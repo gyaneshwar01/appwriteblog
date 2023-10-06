@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import authService from "../appwrite/auth";
-import { login, logout } from "../store/authSlice";
+import { login as _login } from "../store/authSlice";
 import { Button, Input, Logo } from "./index";
 import { useForm } from "react-hook-form";
 
@@ -19,7 +19,7 @@ function Login() {
       if (session) {
         const userData = await authService.getCurrentUser();
         if (userData) {
-          dispatch(login(userData));
+          dispatch(_login({ userData }));
           navigate("/");
         }
       }
@@ -27,6 +27,7 @@ function Login() {
       setError(error.message);
     }
   };
+
   return (
     <div className="flex items-center justify-center w-full">
       <div className="mx-auto w-full max-w-lg bg-gray-100 rounded-xl p-10 border border-black/10">

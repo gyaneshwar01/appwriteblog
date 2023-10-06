@@ -5,16 +5,16 @@ import storageService from "../appwrite/storage";
 import { useSelector } from "react-redux";
 import parse from "html-react-parser";
 import { Button, Container } from "../components";
+import { useDispatch } from "react-redux";
+import { deletePost as _deletePost } from "../store/postSlice";
 
 function Post() {
   const [post, setPost] = useState(null);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { slug } = useParams();
-
   const { userData } = useSelector((state) => state.auth);
-
-  const isAuthor =
-    userData.status && post ? post.userId === userData.$id : false;
+  const [isAuthor, setIsAuthor] = useState(false);
 
   useEffect(() => {
     if (slug) {
@@ -28,18 +28,23 @@ function Post() {
     } else {
       navigate("/");
     }
-  }, [slug, navigate]);
+  }, [slug]);
+
+  useEffect(() => {
+    setIsAuthor(post?.userId === userData?.$id);
+  }, [userData, post]);
 
   const deletePost = () => {
     databaseService.deletePost(post.$id).then((deleteStatus) => {
       if (deleteStatus) {
         storageService.deleteFile(post.featuredImage);
+        dispatch(_deletePost({ $id: post.$id }));
         navigate("/");
       }
     });
   };
 
-  return post ? (
+  return post && userData ? (
     <div className="py-8">
       <Container>
         <div className="w-full flex justify-center mb-4 relative border rounded-xl p-2">
@@ -68,7 +73,9 @@ function Post() {
         <div className="browser-css">{parse(post.content)}</div>
       </Container>
     </div>
-  ) : null;
+  ) : (
+    <h1>Loading Post...</h1>
+  );
 }
 
 export default Post;

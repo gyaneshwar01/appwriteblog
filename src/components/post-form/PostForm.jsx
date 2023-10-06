@@ -4,8 +4,11 @@ import { Button, Input, Select, RTE } from "../index";
 import databaseService from "../../appwrite/database";
 import storageService from "../../appwrite/storage";
 import { useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { createPost, updatePost } from "../../store/postSlice";
 
 function PostForm({ post }) {
+  const dispatch = useDispatch();
   const { handleSubmit, register, setValue, getValues, control } = useForm({
     defaultValues: {
       title: post?.title || "",
@@ -17,8 +20,6 @@ function PostForm({ post }) {
 
   const navigate = useNavigate();
   const { userData } = useSelector((state) => state.auth);
-
-  console.log({ userData });
 
   const onSubmit = async (data) => {
     try {
@@ -33,6 +34,7 @@ function PostForm({ post }) {
             ...data,
             featuredImage: file.$id,
           });
+          dispatch(updatePost({ post: dbPost }));
           navigate(`/post/${dbPost.$id}`);
         }
       } else {
@@ -45,6 +47,7 @@ function PostForm({ post }) {
             featuredImage: file.$id,
             userId: userData.$id,
           });
+          dispatch(createPost({ post: dbPost }));
           navigate(`/post/${dbPost.$id}`);
         }
       }

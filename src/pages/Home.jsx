@@ -1,19 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { Container, PostCard } from "../components";
+import { Container } from "../components";
 import databaseService from "../appwrite/database";
+import { useSelector } from "react-redux";
+import AllPosts from "./AllPosts";
+import { useDispatch } from "react-redux";
+import { addPosts } from "../store/postSlice";
 
 function Home() {
   const [posts, setPosts] = useState([]);
+  const { status } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    databaseService.getPosts().then((posts) => {
-      if (posts) {
-        setPosts(posts.documents);
-      }
-    });
-  }, []);
+    if (status)
+      databaseService.getPosts().then((posts) => {
+        if (posts) {
+          setPosts(posts.documents);
+          dispatch(addPosts({ posts: posts.documents }));
+        }
+      });
+  }, [status]);
 
-  if (posts.length === 0) {
+  if (posts.length === 0 || !status) {
     return (
       <div className="w-full py-8 mt-4 text-center">
         <Container>
@@ -28,19 +36,7 @@ function Home() {
       </div>
     );
   }
-  return (
-    <div className="w-full py-8">
-      <Container>
-        <div className="flex flex-wrap">
-          {posts.map((post) => (
-            <div key={post.$id} className="p-2 w-1/4">
-              <PostCard {...post} />
-            </div>
-          ))}
-        </div>
-      </Container>
-    </div>
-  );
+  return <AllPosts />;
 }
 
 export default Home;

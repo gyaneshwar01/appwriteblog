@@ -1,23 +1,8 @@
-import React, { useState, useEffect } from "react";
 import { PostCard, Container } from "../components";
-import databaseService from "../appwrite/database";
+import { useSelector } from "react-redux";
 
 const AllPosts = () => {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    databaseService.getPosts().then((postsData) => {
-      if (postsData) {
-        setPosts(postsData.documents);
-        setLoading(false);
-      }
-    });
-  }, []);
-
-  if (loading) {
-    return <h1>Loading Posts...</h1>;
-  }
+  const { posts } = useSelector((state) => state.post);
 
   return posts.length > 0 ? (
     <div className="w-full py-8">
