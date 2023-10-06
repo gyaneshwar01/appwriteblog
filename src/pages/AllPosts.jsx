@@ -1,15 +1,32 @@
+import { useEffect, useState } from "react";
 import { PostCard, Container } from "../components";
-import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import databaseService from "../appwrite/database";
+import { addPosts } from "../store/postSlice";
 
 const AllPosts = () => {
-  const { posts } = useSelector((state) => state.post);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    databaseService.getPosts().then((postData) => {
+      setPosts(postData.documents);
+      dispatch(addPosts({ posts: postData.documents }));
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) {
+    return <h1>Loading posts...</h1>;
+  }
 
   return posts.length > 0 ? (
     <div className="w-full py-8">
       <Container>
         <div className="flex flex-wrap">
           {posts.map((post) => (
-            <div key={post.$id} className="p-2 w-1/4">
+            <div key={post?.$id} className="p-2 w-1/4">
               <PostCard {...post} />
             </div>
           ))}
